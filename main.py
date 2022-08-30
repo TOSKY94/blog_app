@@ -3,10 +3,9 @@ from fastapi import FastAPI, Response, status,HTTPException, Depends
 from fastapi.params import Body
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from . import models
+from . import models, schema
 from .database import engine, get_db
 from sqlalchemy.orm import Session
-from .schema import Post
 
 app = FastAPI()
 
@@ -30,7 +29,7 @@ def get_post(id:int, db: Session = Depends(get_db)):
 
 #create post
 @app.post('/posts/create')
-def create_post(post:Post, db: Session = Depends(get_db)):
+def create_post(post:schema.CreatePost, db: Session = Depends(get_db)):
     post = models.Post(**post.dict())
     db.add(post)
     db.commit()
@@ -39,7 +38,7 @@ def create_post(post:Post, db: Session = Depends(get_db)):
 
 #update post
 @app.put('/posts/{id}')
-def update_post(id: int,post:Post, db: Session = Depends(get_db)):
+def update_post(id: int,post:schema.UpdatePost, db: Session = Depends(get_db)):
     post_qery = db.query(models.Post).filter(models.Post.id==id)
 
     if not post_qery.first():
