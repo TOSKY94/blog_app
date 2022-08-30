@@ -4,8 +4,12 @@ from fastapi.params import Body
 from pydantic import BaseModel
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from . import models
+from .database import engine
 
 app = FastAPI()
+
+models.Base.metadata.create_all(bind=engine)
 
 class post(BaseModel):
     title: str
