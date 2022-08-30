@@ -1,14 +1,12 @@
-from email import contentmanager
-from email.policy import default
-from tokenize import String
-from turtle import title
-from xmlrpc.client import Boolean
 from .database import Base
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP
+from sqlalchemy.sql.sqltypes import TIMESTAMP
+from sqlalchemy.sql.expression import text
 
-class post(Base):
+class Post(Base):
     __tablename__ = "posts"
     id = Column(Integer, primary_key=True, nullable=False)
     title = Column(String, nullable=False)
     content = Column(String, nullable=False)
-    published = Column(Boolean, default=True)
+    published = Column(Boolean,nullable=False, server_default='TRUE')
+    create_date =Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
