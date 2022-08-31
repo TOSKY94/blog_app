@@ -1,4 +1,5 @@
 import time
+from typing import Optional, List
 from fastapi import FastAPI, Response, status,HTTPException, Depends
 from fastapi.params import Body
 import psycopg2
@@ -12,32 +13,32 @@ app = FastAPI()
 models.Base.metadata.create_all(bind=engine)
 
 #get posts
-@app.get('/posts')
+@app.get('/posts', status_code=status.HTTP_200_OK, response_model=List[schema.Post])
 def get_posts(db: Session = Depends(get_db)):
     # cursor.execute("""SELECT * FROM posts""")
     # posts = cursor.fetchall()
     posts = db.query(models.Post).all()
-    return {"message":"sucess", "data":posts}
+    return posts
 
 #get  posts by id
-@app.get('/posts/{id}')
+@app.get('/posts/{id}', status_code=status.HTTP_200_OK, response_model=schema.Post)
 def get_post(id:int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id==id).first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='record not found')
-    return {"message":"sucess", "data":post}
+    return post
 
 #create post
-@app.post('/posts/create')
+@app.post('/posts/create', status_code=status.HTTP_201_CREATED, response_model=schema.Post)
 def create_post(post:schema.CreatePost, db: Session = Depends(get_db)):
     post = models.Post(**post.dict())
     db.add(post)
     db.commit()
     db.refresh(post)
-    return {"message":"sucess", "data":post}
+    return post
 
 #update post
-@app.put('/posts/{id}')
+@app.put('/posts/{id}',status_code=status.HTTP_201_CREATED, response_model=schema.Post)
 def update_post(id: int,post:schema.UpdatePost, db: Session = Depends(get_db)):
     post_qery = db.query(models.Post).filter(models.Post.id==id)
 
@@ -46,7 +47,7 @@ def update_post(id: int,post:schema.UpdatePost, db: Session = Depends(get_db)):
     print(post)
     post_qery.update(post.dict(), synchronize_session=False)
     db.commit()
-    return {"message":"record updated", "data": post_qery.first()}
+    return post_qery.first()
 
 #delete post
 @app.delete('/posts/{id}')
