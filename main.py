@@ -58,3 +58,13 @@ def delete_post(id, db: Session = Depends(get_db)):
     if not post.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='record not found')
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+#create user
+@app.post('/users/create', status_code=status.HTTP_201_CREATED, response_model=schema.UserOut)
+def create_user(user:schema.User, db: Session = Depends(get_db)):
+    user = models.User(**user.dict())
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
