@@ -4,7 +4,7 @@ from fastapi import FastAPI, Response, status,HTTPException, Depends
 from fastapi.params import Body
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from . import models, schema
+from . import models, schema, utils
 from .database import engine, get_db
 from sqlalchemy.orm import Session
 
@@ -63,6 +63,8 @@ def delete_post(id, db: Session = Depends(get_db)):
 #create user
 @app.post('/users/create', status_code=status.HTTP_201_CREATED, response_model=schema.UserOut)
 def create_user(user:schema.User, db: Session = Depends(get_db)):
+    #hash password
+    user.password = utils.hash_password(user.password)
     user = models.User(**user.dict())
     db.add(user)
     db.commit()
