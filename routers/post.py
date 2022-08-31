@@ -4,16 +4,16 @@ from fastapi import FastAPI, Response, status,HTTPException, Depends, APIRouter
 from ..database import engine, get_db
 from sqlalchemy.orm import Session
 
-router = APIRouter()
+router = APIRouter(prefix="/posts", tags=['Posts'])
 
 #get posts
-@router.get('/posts', status_code=status.HTTP_200_OK, response_model=List[schemas.Post])
+@router.get('/', status_code=status.HTTP_200_OK, response_model=List[schemas.Post])
 def get_posts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
     return posts
 
 #get  posts by id
-@router.get('/posts/{id}', status_code=status.HTTP_200_OK, response_model=schemas.Post)
+@router.get('/{id}', status_code=status.HTTP_200_OK, response_model=schemas.Post)
 def get_post(id:int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id==id).first()
     if not post:
@@ -21,7 +21,7 @@ def get_post(id:int, db: Session = Depends(get_db)):
     return post
 
 #create post
-@router.post('/posts/create', status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
+@router.post('/create', status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
 def create_post(post:schemas.CreatePost, db: Session = Depends(get_db)):
     post = models.Post(**post.dict())
     db.add(post)
@@ -30,7 +30,7 @@ def create_post(post:schemas.CreatePost, db: Session = Depends(get_db)):
     return post
 
 #update post
-@router.put('/posts/{id}',status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
+@router.put('/{id}',status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
 def update_post(id: int,post:schemas.UpdatePost, db: Session = Depends(get_db)):
     post_qery = db.query(models.Post).filter(models.Post.id==id)
 
@@ -42,7 +42,7 @@ def update_post(id: int,post:schemas.UpdatePost, db: Session = Depends(get_db)):
     return post_qery.first()
 
 #delete post
-@router.delete('/posts/{id}')
+@router.delete('/{id}')
 def delete_post(id, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id==id)
     post.delete(synchronize_session=False)
